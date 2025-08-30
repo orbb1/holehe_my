@@ -64,26 +64,32 @@ def get_functions(modules,args=None):
 
 def check_update():
     """Check and update holehe if not the last version"""
-    check_version = httpx.get("https://pypi.org/pypi/holehe/json")
-    if check_version.json()["info"]["version"] != __version__:
-        if os.name != 'nt':
-            p = Popen(["pip3",
-                       "install",
-                       "--upgrade",
-                       "holehe"],
-                      stdout=PIPE,
-                      stderr=PIPE)
-        else:
-            p = Popen(["pip",
-                       "install",
-                       "--upgrade",
-                       "holehe"],
-                      stdout=PIPE,
-                      stderr=PIPE)
-        (output, err) = p.communicate()
-        p_status = p.wait()
-        print("Holehe has just been updated, you can restart it.")
-        exit()
+    try:
+        check_version = httpx.get("https://pypi.org/pypi/holehe/json")
+        if check_version.status_code == 200:
+            version_data = check_version.json()
+            if version_data["info"]["version"] != __version__:
+                if os.name != 'nt':
+                    p = Popen(["pip3",
+                               "install",
+                               "--upgrade",
+                               "holehe"],
+                              stdout=PIPE,
+                              stderr=PIPE)
+                else:
+                    p = Popen(["pip",
+                               "install",
+                               "--upgrade",
+                               "holehe"],
+                              stdout=PIPE,
+                              stderr=PIPE)
+                (output, err) = p.communicate()
+                p_status = p.wait()
+                print("Holehe has just been updated, you can restart it.")
+                exit()
+    except Exception:
+        # Silently fail if update check fails
+        pass
 
 def credit():
     """Print Credit"""
